@@ -203,7 +203,8 @@ namespace Nop.Web.Areas.Admin.Factories
 
             //prepare available parent categories
             _baseAdminModelFactory.PrepareCategories(model.AvailableCategories,
-                defaultItemText: _localizationService.GetResource("Admin.Catalog.Categories.Fields.Parent.None"));
+                defaultItemText: _localizationService.GetResource("Admin.Catalog.Categories.Fields.Parent.None"),
+                currentCategoryId: model.ParentCategoryId);
 
             //prepare model discounts
             var availableDiscounts = _discountService.GetAllDiscounts(DiscountType.AssignedToCategories, showHidden: true);

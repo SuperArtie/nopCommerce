@@ -48,6 +48,11 @@ namespace Nop.Core.Domain.Common
         public bool UseRichEditorInMessageTemplates { get; set; }
 
         /// <summary>
+        /// A value indicating whether to use rich editor on message templates and campaigns details pages
+        /// </summary>
+        public bool UseSearchableSelectForCategories { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether advertisements (news) should be hidden
         /// </summary>
         public bool HideAdvertisementsOnAdminArea { get; set; }

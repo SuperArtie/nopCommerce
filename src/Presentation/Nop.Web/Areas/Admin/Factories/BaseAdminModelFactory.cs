@@ -4,6 +4,7 @@ using System.Linq;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Nop.Core.Caching;
 using Nop.Core.Domain.Catalog;
+using Nop.Core.Domain.Common;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Gdpr;
 using Nop.Core.Domain.Logging;
@@ -59,6 +60,7 @@ namespace Nop.Web.Areas.Admin.Factories
         private readonly ITaxCategoryService _taxCategoryService;
         private readonly ITopicTemplateService _topicTemplateService;
         private readonly IVendorService _vendorService;
+        private readonly AdminAreaSettings _adminAreaSettings;
 
         #endregion
 
@@ -85,7 +87,8 @@ namespace Nop.Web.Areas.Admin.Factories
             IStoreService storeService,
             ITaxCategoryService taxCategoryService,
             ITopicTemplateService topicTemplateService,
-            IVendorService vendorService)
+            IVendorService vendorService,
+            AdminAreaSettings adminAreaSettings)
         {
             _categoryService = categoryService;
             _categoryTemplateService = categoryTemplateService;
@@ -109,6 +112,7 @@ namespace Nop.Web.Areas.Admin.Factories
             _taxCategoryService = taxCategoryService;
             _topicTemplateService = topicTemplateService;
             _vendorService = vendorService;
+            _adminAreaSettings = adminAreaSettings;
         }
 
         #endregion
@@ -403,10 +407,27 @@ namespace Nop.Web.Areas.Admin.Factories
         /// <param name="items">Category items</param>
         /// <param name="withSpecialDefaultItem">Whether to insert the first special item for the default value</param>
         /// <param name="defaultItemText">Default item text; pass null to use default value of the default item text</param>
-        public virtual void PrepareCategories(IList<SelectListItem> items, bool withSpecialDefaultItem = true, string defaultItemText = null)
+        /// <param name="currentCategoryId">For use when searchable select is enabled for categories</param>
+        public virtual void PrepareCategories(IList<SelectListItem> items, bool withSpecialDefaultItem = true,
+            string defaultItemText = null, int currentCategoryId = 0)
         {
             if (items == null)
                 throw new ArgumentNullException(nameof(items));
+
+            //insert special item for the default value
+            PrepareDefaultItem(items, withSpecialDefaultItem, defaultItemText);
+
+            //categories will be loaded dynamically through client-side text search
+            if (_adminAreaSettings.UseSearchableSelectForCategories)
+            {
+                if (currentCategoryId <= 0) return;
+                var currentCategory = _categoryService.GetCategoryById(currentCategoryId);
+                if (currentCategory == null) return;
+                var categoryName = _categoryService.GetFormattedBreadCrumb(currentCategory);
+                if (string.IsNullOrWhiteSpace(categoryName)) return;
+                items.Add(new SelectListItem {Text = categoryName, Value = currentCategoryId.ToString()});
+                return;
+            }
 
             //prepare available categories
             var availableCategoryItems = SelectListHelper.GetCategoryList(_categoryService, _cacheManager, true);
@@ -414,9 +435,6 @@ namespace Nop.Web.Areas.Admin.Factories
             {
                 items.Add(categoryItem);
             }
-
-            //insert special item for the default value
-            PrepareDefaultItem(items, withSpecialDefaultItem, defaultItemText);
         }
 
         /// <summary>

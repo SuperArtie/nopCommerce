@@ -19,6 +19,8 @@ namespace Nop.Web.Framework.TagHelpers.Admin
         private const string ItemsAttributeName = "asp-items";
         private const string DisabledAttributeName = "asp-multiple";
         private const string RequiredAttributeName = "asp-required";
+        private const string SearchableAttributeName = "asp-searchable";
+        private const string SearchActionAttributeName = "asp-search-action";
 
         private readonly IHtmlHelper _htmlHelper;
 
@@ -51,6 +53,18 @@ namespace Nop.Web.Framework.TagHelpers.Admin
         /// </summary>
         [HtmlAttributeName(DisabledAttributeName)]
         public string IsMultiple { set; get; }
+
+        /// <summary>
+        /// Indicates whether the input is searchable
+        /// </summary>
+        [HtmlAttributeName(SearchableAttributeName)]
+        public string IsSearchable { set; get; }
+
+        /// <summary>
+        /// Route for searchable select routine
+        /// </summary>
+        [HtmlAttributeName(SearchActionAttributeName)]
+        public string SearchAction { set; get; }
 
         /// <summary>
         /// ViewContext
@@ -118,12 +132,18 @@ namespace Nop.Web.Framework.TagHelpers.Admin
             //generate editor
             var tagName = For != null ? For.Name : Name;
             bool.TryParse(IsMultiple, out bool multiple);
+            bool.TryParse(IsSearchable, out bool searchable);
             if (!string.IsNullOrEmpty(tagName))
             {
                 IHtmlContent selectList;
                 if (multiple)
                 {
                     selectList = _htmlHelper.Editor(tagName, "MultiSelect", new {htmlAttributes, SelectList = Items});
+                }
+                else if (searchable)
+                {
+                    selectList = _htmlHelper.Editor(tagName, "SearchableSelect",
+                        new {htmlAttributes, SelectList = Items});
                 }
                 else
                 {
