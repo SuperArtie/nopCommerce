@@ -318,3 +318,86 @@ $(document).ready(function () {
     reloadAllDataTables();
   });
 });
+
+//searchable selects
+function SearchableSelect(selector, url) {
+
+  this.keyStrokeCount = 0;
+  this.jQuerySelector = selector;
+  this.searchRoutineUrl = url;
+
+  this.init = function(itemJson, startIndex, defaultValue, defaultText) {
+
+    $(this.jQuerySelector).kendoComboBox({
+      dataSource: itemJson,
+      dataTextField: "Text",
+      dataValueField: "Value"
+    });
+
+    var comboBox = $(this.jQuerySelector).data("kendoComboBox");
+
+    if (startIndex > 0) {
+      comboBox.select(startIndex);
+    } else {
+      $(this.jQuerySelector).val(defaultValue);
+      comboBox.input.attr("placeholder", defaultText);
+    }
+
+    var that = this;
+
+    comboBox.input.keyup(function(e) {
+      if (comboBox.text().trim().length < 3) return;
+
+      var keycode = e.keyCode;
+      var isLetter = keycode > 64 && keycode < 91;
+
+      var isNumericOrMisc = (keycode > 47 && keycode < 58) ||
+        (keycode > 95 && keycode < 112) ||
+        (keycode > 185 && keycode < 193) ||
+        (keycode > 218 && keycode < 223);
+
+      var isDeleteOrBackspace = keycode === 46 || keycode === 8;
+
+      if (isLetter || isNumericOrMisc || isDeleteOrBackspace) {
+        that.queueRequest();
+      }
+    });
+  }
+
+  this.queueRequest = function() {
+
+    this.keyStrokeCount++;
+    var that = this;
+
+    setTimeout(function () {
+      that.keyStrokeCount--;
+      if (that.keyStrokeCount === 0) {
+        that.sendRequest($(that.jQuerySelector).data("kendoComboBox").text().trim());
+      }
+    }, 500);
+  }
+
+  this.sendRequest = function(query) {
+
+    var that = this;
+
+    $.post(this.searchRoutineUrl,
+      addAntiForgeryToken({ searchTerm: query }),
+      function (data) {
+
+        var combobox = $(that.jQuerySelector).data("kendoComboBox");
+        var currentSearchableSelectText = combobox.text();
+        combobox.dataSource.data(data);
+        combobox.open();
+
+        //sometimes the input text gets overridden after updating the dataSource
+        combobox.text(currentSearchableSelectText);
+      }).always(function () {
+
+        var currentSearchableSelectText = $(that.jQuerySelector).data("kendoComboBox").text().trim();
+        if (currentSearchableSelectText.length > 2 && currentSearchableSelectText !== query) {
+          that.queueRequest();
+        }
+    });
+  }
+}

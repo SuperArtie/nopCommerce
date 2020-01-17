@@ -11,79 +11,9 @@
 <input id="@Html.IdForModel()" name="@Html.NameForModel()" />
 
 <script>
-    var requestQueue = 0;
-
     $(document).ready(function() {
-        
-        $("#@Html.IdForModel()").kendoComboBox({
-            dataSource: @Html.Raw(itemJson),
-            dataTextField: "Text",
-            dataValueField: "Value"
-        });
-        
-        var comboBox = $("#@Html.IdForModel()").data("kendoComboBox");
 
-        if (@startIndex > 0) {
-
-            comboBox.select(@startIndex);
-        } else {
-            $("#@Html.IdForModel()").val('@items.First().Value');
-            comboBox.input.attr("placeholder", "@items.First().Text");
-        }
-
-        comboBox.input.keyup(function (e) {
-            
-            if (comboBox.text().trim().length < 3) return;
-
-            var keycode = e.keyCode;
-
-            var isLetter = keycode > 64 && keycode < 91;
-
-            var isNumericOrMisc = (keycode > 47 && keycode < 58) ||
-                (keycode > 95 && keycode < 112) ||
-                (keycode > 185 && keycode < 193) ||
-                (keycode > 218 && keycode < 223);
-
-            var isDeleteOrBackspace = keycode == 46 || keycode == 8;
-
-            if (isLetter || isNumericOrMisc || isDeleteOrBackspace) {
-
-                queueSearchableSelectRequest();
-            }
-        });
-
-        function queueSearchableSelectRequest() {
-            requestQueue++;
-            setTimeout(function() {
-                requestQueue--;
-                if (requestQueue === 0) {
-                    sendSearchableSelectRequest($("#@Html.IdForModel()").data("kendoComboBox").text());
-                }
-            }, 500); // timeout in milliseconds could be made configurable by an admin setting.
-        }
-
-        function sendSearchableSelectRequest(query) {
-            
-            $.post("/Admin/Category/SearchCategoryName",
-                addAntiForgeryToken({ searchTerm: query }),
-                function(data) {
-                    var combobox = $("#@Html.IdForModel()").data("kendoComboBox");
-                    
-                    var currentSearchableSelectText = combobox.text();
-
-                    combobox.dataSource.data(data);
-                    
-                    combobox.open();
-
-                    //sometimes the input text gets overridden after updating the dataSource
-                    combobox.text(currentSearchableSelectText);
-                    
-                }).always(function () {
-                    var currentSearchableSelectText = $("#@Html.IdForModel()").data("kendoComboBox").text().trim();
-                    if (currentSearchableSelectText.length > 2 && currentSearchableSelectText !== query) {
-                        queueSearchableSelectRequest();
-                    }
-            });
-        }
+        var searchableSelect = new SearchableSelect("#@Html.IdForModel()", "/Admin/Category/SearchCategoryName");
+        searchableSelect.init(@Html.Raw(itemJson), @startIndex, "@items.First().Value", "@items.First().Text");
     });
 </script>
