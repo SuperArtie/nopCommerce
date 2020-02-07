@@ -53,7 +53,7 @@
             <nop-label asp-for="ParentCategoryId" />
         </div>
         <div class="col-md-9">
-            <nop-select asp-for="ParentCategoryId" asp-searchable="@isSearchable" asp-items="Model.AvailableCategories"/>
+            <nop-select asp-for="ParentCategoryId" asp-items="Model.AvailableCategories" asp-searchable="@isSearchable" />
             <span asp-validation-for="ParentCategoryId"></span>
         </div>
     </div>

@@ -20,7 +20,7 @@ namespace Nop.Web.Framework.TagHelpers.Admin
         private const string DisabledAttributeName = "asp-multiple";
         private const string RequiredAttributeName = "asp-required";
         private const string SearchableAttributeName = "asp-searchable";
-        private const string SearchActionAttributeName = "asp-search-action";
+        private const string SearchActionAttributeName = "asp-action";
 
         private readonly IHtmlHelper _htmlHelper;
 
@@ -137,13 +137,15 @@ namespace Nop.Web.Framework.TagHelpers.Admin
             {
                 IHtmlContent selectList;
                 if (multiple)
-                {
                     selectList = _htmlHelper.Editor(tagName, "MultiSelect", new {htmlAttributes, SelectList = Items});
-                }
                 else if (searchable)
                 {
-                    selectList = _htmlHelper.Editor(tagName, "SearchableSelect",
-                        new {htmlAttributes, SelectList = Items});
+                    if (!string.IsNullOrWhiteSpace(SearchAction))
+                        selectList = _htmlHelper.Editor(tagName, "SearchableSelect",
+                            new { htmlAttributes, SelectList = Items, SearchAction });
+                    else
+                        selectList = _htmlHelper.Editor(tagName, "SearchableSelect",
+                            new { htmlAttributes, SelectList = Items });
                 }
                 else
                 {

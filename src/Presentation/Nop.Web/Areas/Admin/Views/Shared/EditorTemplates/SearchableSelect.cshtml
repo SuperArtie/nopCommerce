@@ -6,6 +6,8 @@
     var items = (List<SelectListItem>)ViewData["SelectList"];
     var itemJson = JsonConvert.SerializeObject(items.Select(x => new { x.Text, x.Value }));
     var startIndex = items.Count > 1 ? items.FirstOrDefault(x => x.Value == Model.ToString()) != null ? items.IndexOf(items.FirstOrDefault(x => x.Value == Model.ToString())) : 0 : 0;
+    var url = ViewData.Keys.Contains("SearchAction") ? ViewData["SearchAction"].ToString() : "/Admin/SearchSelect/DefaultSelectSearch";
+    var propName = ViewData.Keys.Contains("SearchAction") ? string.Empty : Html.NameForModel();
 }
 
 <input id="@Html.IdForModel()" name="@Html.NameForModel()" />
@@ -13,7 +15,7 @@
 <script>
     $(document).ready(function() {
 
-        var searchableSelect = new SearchableSelect("#@Html.IdForModel()", "/Admin/Category/SearchCategoryName");
+        var searchableSelect = new SearchableSelect("#@Html.IdForModel()", "@url", "@propName");
         searchableSelect.init(@Html.Raw(itemJson), @startIndex, "@items.First().Value", "@items.First().Text");
     });
 </script>

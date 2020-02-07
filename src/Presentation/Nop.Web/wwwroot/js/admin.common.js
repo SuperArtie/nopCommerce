@@ -320,11 +320,12 @@ $(document).ready(function () {
 });
 
 //searchable selects
-function SearchableSelect(selector, url) {
+function SearchableSelect(selector, url, property) {
 
   this.keyStrokeCount = 0;
   this.jQuerySelector = selector;
   this.searchRoutineUrl = url;
+  this.propertyName = property;
 
   this.init = function(itemJson, startIndex, defaultValue, defaultText) {
 
@@ -346,7 +347,7 @@ function SearchableSelect(selector, url) {
     var that = this;
 
     comboBox.input.keyup(function(e) {
-      if (comboBox.text().trim().length < 3) return;
+      if (comboBox.text().trim().length < 2) return;
 
       var keycode = e.keyCode;
       var isLetter = keycode > 64 && keycode < 91;
@@ -379,10 +380,14 @@ function SearchableSelect(selector, url) {
 
   this.sendRequest = function(query) {
 
+    var queryData = { searchTerm: query };
+
+    if (this.propertyName !== "") queryData.propName = this.propertyName;
+
     var that = this;
 
     $.post(this.searchRoutineUrl,
-      addAntiForgeryToken({ searchTerm: query }),
+      addAntiForgeryToken(queryData),
       function (data) {
 
         var combobox = $(that.jQuerySelector).data("kendoComboBox");
@@ -390,12 +395,12 @@ function SearchableSelect(selector, url) {
         combobox.dataSource.data(data);
         combobox.open();
 
-        //sometimes the input text gets overridden after updating the dataSource
+        //sometimes the input text gets overwritten after updating the dataSource
         combobox.text(currentSearchableSelectText);
       }).always(function () {
 
         var currentSearchableSelectText = $(that.jQuerySelector).data("kendoComboBox").text().trim();
-        if (currentSearchableSelectText.length > 2 && currentSearchableSelectText !== query) {
+        if (currentSearchableSelectText.length > 1 && currentSearchableSelectText !== query) {
           that.queueRequest();
         }
     });
