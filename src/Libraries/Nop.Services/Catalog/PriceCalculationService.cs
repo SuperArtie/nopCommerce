@@ -232,7 +232,7 @@ namespace Nop.Services.Catalog
         /// <returns>Discount amount</returns>
         protected virtual decimal GetDiscountAmount(Product product,
             Customer customer,
-            decimal productPriceWithoutDiscount,
+            ref decimal productPriceWithoutDiscount,
             out List<Discount> appliedDiscounts)
         {
             if (product == null)
@@ -255,7 +255,9 @@ namespace Nop.Services.Catalog
             if (!allowedDiscounts.Any())
                 return appliedDiscountAmount;
 
-            appliedDiscounts = _discountService.GetPreferredDiscount(allowedDiscounts, productPriceWithoutDiscount, out appliedDiscountAmount);
+            appliedDiscounts = _discountService.GetPreferredDiscount(allowedDiscounts, ref productPriceWithoutDiscount,
+                product, out appliedDiscountAmount);
+
             return appliedDiscountAmount;
         }
 
@@ -401,7 +403,7 @@ namespace Nop.Services.Catalog
                 if (includeDiscounts)
                 {
                     //discount
-                    var tmpDiscountAmount = GetDiscountAmount(product, customer, price, out var tmpAppliedDiscounts);
+                    var tmpDiscountAmount = GetDiscountAmount(product, customer, ref price, out var tmpAppliedDiscounts);
                     price -= tmpDiscountAmount;
 
                     if (tmpAppliedDiscounts?.Any() ?? false)

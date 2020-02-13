@@ -23,25 +23,29 @@
             $('#discount-applied-to-products-panel').hide();
             $('#pnlMaximumDiscountedQuantity').show();
             $('#pnlAppliedToSubCategories').show();
-    } else if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToManufacturers).ToString())) {
+            $('#pnlUseOldPrice').hide();
+        } else if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToManufacturers).ToString())) {
             $('#discount-applied-to-categories-panel').hide();
             $('#discount-applied-to-manufacturers-panel').show();
             $('#discount-applied-to-products-panel').hide();
             $('#pnlMaximumDiscountedQuantity').show();
             $('#pnlAppliedToSubCategories').hide();
-    } else if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToSkus).ToString())) {
+            $('#pnlUseOldPrice').hide();
+        } else if (selectedDiscountTypeId == @(((int) DiscountType.AssignedToSkus).ToString())) {
             $('#discount-applied-to-categories-panel').hide();
             $('#discount-applied-to-manufacturers-panel').hide();
             $('#discount-applied-to-products-panel').show();
             $('#pnlMaximumDiscountedQuantity').show();
             $('#pnlAppliedToSubCategories').hide();
-    } else {
+            $('#pnlUseOldPrice').show();
+        } else {
             $('#discount-applied-to-categories-panel').hide();
             $('#discount-applied-to-manufacturers-panel').hide();
             $('#discount-applied-to-products-panel').hide();
             $('#pnlMaximumDiscountedQuantity').hide();
             $('#pnlAppliedToSubCategories').hide();
-    }
+            $('#pnlUseOldPrice').hide();
+        }
     }
 
     function toggleLimitation() {
@@ -110,6 +114,15 @@
         <div class="col-md-9">
             <nop-editor asp-for="AppliedToSubCategories" />
             <span asp-validation-for="AppliedToSubCategories"></span>
+        </div>
+    </div>
+    <div class="form-group" id="pnlUseOldPrice">
+        <div class="col-md-3">
+            <nop-label asp-for="UseOldPrice" />
+        </div>
+        <div class="col-md-9">
+            <nop-editor asp-for="UseOldPrice" />
+            <span asp-validation-for="UseOldPrice"></span>
         </div>
     </div>
     <div class="form-group">

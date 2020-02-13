@@ -90,6 +90,12 @@ namespace Nop.Core.Domain.Discounts
         public bool AppliedToSubCategories { get; set; }
 
         /// <summary>
+        /// Gets or sets value indicating whether it should be applied to the OldPrice of a Product
+        /// Used with "Assigned to products" type only.
+        /// </summary>
+        public bool UseOldPrice { get; set; }
+
+        /// <summary>
         /// Gets or sets the discount type
         /// </summary>
         public DiscountType DiscountType

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using Nop.Core;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
 
@@ -81,6 +82,17 @@ namespace Nop.Services.Discounts
         /// <returns>Preferred discount</returns>
         List<Discount> GetPreferredDiscount(IList<Discount> discounts,
             decimal amount, out decimal discountAmount);
+
+        /// <summary>
+        /// Get preferred discount (with maximum discount value)
+        /// </summary>
+        /// <param name="discounts">A list of discounts to check</param>
+        /// <param name="amount">Amount (initial value)</param>
+        /// <param name="product">Product associated with discounts</param>
+        /// <param name="discountAmount">Discount amount</param>
+        /// <returns>Preferred discount</returns>
+        List<Discount> GetPreferredDiscount(IList<Discount> discounts,
+            ref decimal amount, Product product, out decimal discountAmount);
 
         /// <summary>
         /// Check whether a list of discounts already contains a certain discount instance

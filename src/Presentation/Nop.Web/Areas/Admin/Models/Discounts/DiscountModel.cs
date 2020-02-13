@@ -44,6 +44,9 @@ namespace Nop.Web.Areas.Admin.Models.Discounts
         [NopResourceDisplayName("Admin.Promotions.Discounts.Fields.TimesUsed")]
         public int TimesUsed { get; set; }
 
+        [NopResourceDisplayName("Admin.Promotions.Discounts.Fields.UseOldPrice")]
+        public bool UseOldPrice { get; set; }
+
         [NopResourceDisplayName("Admin.Promotions.Discounts.Fields.UsePercentage")]
         public bool UsePercentage { get; set; }
 

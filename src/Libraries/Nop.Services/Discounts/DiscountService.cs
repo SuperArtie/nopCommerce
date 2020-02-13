@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Nop.Core;
 using Nop.Core.Caching;
+using Nop.Core.Domain.Catalog;
 using Nop.Core.Domain.Customers;
 using Nop.Core.Domain.Discounts;
 using Nop.Core.Domain.Orders;
@@ -344,6 +345,64 @@ namespace Nop.Services.Discounts
                 return result;
 
             var cumulativeDiscountAmount = cumulativeDiscounts.Sum(d => GetDiscountAmount(d, amount));
+            if (cumulativeDiscountAmount <= discountAmount)
+                return result;
+
+            discountAmount = cumulativeDiscountAmount;
+
+            result.Clear();
+            result.AddRange(cumulativeDiscounts);
+
+            return result;
+        }
+
+        /// <summary>
+        /// Get preferred discount (with maximum discount value)
+        /// </summary>
+        /// <param name="discounts">A list of discounts to check</param>
+        /// <param name="amount">Amount (initial value)</param>
+        /// <param name="product">Product associated with discounts</param>
+        /// <param name="discountAmount">Discount amount</param>
+        /// <returns>Preferred discount</returns>
+        public virtual List<Discount> GetPreferredDiscount(IList<Discount> discounts,
+            ref decimal amount, Product product, out decimal discountAmount)
+        {
+            if (discounts == null)
+                throw new ArgumentNullException(nameof(discounts));
+
+            var result = new List<Discount>();
+            discountAmount = decimal.Zero;
+            if (!discounts.Any())
+                return result;
+
+            //if any discount is based on OldPrice then adjust the initial value
+            if (discounts.Any(x => x.UseOldPrice) && !product.HasTierPrices)
+                amount = product.OldPrice;
+                    
+            //first we check simple discounts
+            foreach (var discount in discounts)
+            {
+                var currentDiscountValue = GetDiscountAmount(discount, amount);
+                
+                if (currentDiscountValue <= discountAmount)
+                    continue;
+
+                discountAmount = currentDiscountValue;
+
+                result.Clear();
+                result.Add(discount);
+            }
+
+            //now let's check cumulative discounts
+            //right now we calculate discount values based on the original amount value
+            //please keep it in mind if you're going to use discounts with "percentage"
+            var cumulativeDiscounts = discounts.Where(x => x.IsCumulative).OrderBy(x => x.Name).ToList();
+            if (cumulativeDiscounts.Count <= 1)
+                return result;
+
+            var amt = amount; //cannot use ref inside lambda
+            var cumulativeDiscountAmount = cumulativeDiscounts.Sum(d => GetDiscountAmount(d, amt));
+            
             if (cumulativeDiscountAmount <= discountAmount)
                 return result;
 
